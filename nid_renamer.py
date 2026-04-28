@@ -33,8 +33,8 @@ def rename_nid_files(directory: Path, options="DT"):
     re_D = re.compile(r'Date=(\d{2})-(\d{2})-(\d{4})')
     re_T = re.compile(r'Time=(\d{2}):(\d{2}):(\d{2})')
     # Image sizeは数値部分のみをキャプチャし、単位(µm等)は文字化け回避のため個別に処理する
-    re_S = re.compile(r'Image size=([\d\.]+)')
-    re_L = re.compile(r'Time/Line=([\d\.]+w+)')
+    re_S = re.compile(r'Image size=([\d\.]+)(\w*)')
+    re_L = re.compile(r'Time/Line=([\d\.]+\w*)')
     re_X = re.compile(r'Points=(\d+)')
     re_Y = re.compile(r'Lines=(\d+)')
     # もとにもどすオプションのための正規表現。行末がImage0010.nidのように、Image+数字+.nidで終わるものをキャプチャする。接頭語はどんな文字も許容する。
@@ -85,7 +85,7 @@ def rename_nid_files(directory: Path, options="DT"):
                     # サイズ (数値だけ取り出し、末尾に "um" を強制付加して文字化けを防止)
                     if not info["S"]:
                         m = re_S.search(line)
-                        if m: info["S"] = f"{m.group(1).strip()}um"
+                        if m: info["S"] = f"{m.group(1).strip()}{m.group(2).strip()}"
                     
                     # Time/Line
                     if not info["L"]:
