@@ -11,6 +11,7 @@ Nanosurf AFMのNIDファイルのヘッダーを解析し、オプションに�
     X: Points, fast軸のピクセル数
     Y: Lines, slow軸のライン数
     Z: {Points}x{Lines}形式
+    U: デフォルトの名前の場合は元の名前に戻す。(Image0010.nidなど)
 使用例:
     python nid_renamer.py -DTSZ C:/Data
     上記コマンドは、C:/Dataディレクトリ内のすべての.nidファイルを対象に、日付、時刻、イメージサイズ、Time/Line、解像度をファイル名の接頭語として付加します。
@@ -36,6 +37,8 @@ def rename_nid_files(directory: Path, options="DT"):
     re_L = re.compile(r'Time/Line=([\d\.]+w+)')
     re_X = re.compile(r'Points=(\d+)')
     re_Y = re.compile(r'Lines=(\d+)')
+    # もとにもどすオプションのための正規表現。行末がImage0010.nidのように、Image+数字+.nidで終わるものをキャプチャする。接頭語はどんな文字も許容する。
+    re_Undo = re.compile(r'^(?:.*_)?(Image\d+\.nid)$')
 
     # 処理対象のファイル一覧を取得
     target_files = list(directory.glob("*.nid"))
@@ -56,6 +59,18 @@ def rename_nid_files(directory: Path, options="DT"):
                 for _ in range(300):
                     line = f.readline()
                     if not line: break
+
+                    # Uオプション: デフォルトの名前に戻す
+                    if "U" in options:
+                        m = re_Undo.search(filename)
+                        if m:
+                            # ファイルをクローズしないとリネームできない。
+                            f.close()
+                            new_filename = m.group(1)
+                            new_filepath = filepath.with_name(new_filename)
+                            os.rename(filepath, new_filepath)
+                            print(f"Reverted: {filename} -> {new_filename}")
+                            break  # 次のファイルへ
 
                     # 日付 (DD-MM-YYYY -> YYYYMMDD)
                     if not info["D"]:
@@ -98,6 +113,10 @@ def rename_nid_files(directory: Path, options="DT"):
             else:
                 if "X" in options and info["X"]: parts.append(info["X"])
                 if "Y" in options and info["Y"]: parts.append(info["Y"])
+
+            if "U" in options and not parts:
+                # Uオプションでリネームを元に戻す場合、接頭語がないのが正常なのでスキップ
+                continue
 
             if not parts:
                 print(f"Skip: {filename} (Required info not found in header)")
