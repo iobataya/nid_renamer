@@ -136,6 +136,7 @@ def rename_nid_files(directory: Path, options="DT"):
             # Windowsのファイルシステム競合を避けるためos.renameを使用
             os.rename(filepath, new_filepath)
             print(f"Done: {filename} -> {new_filename}")
+            print(f"  Extracted info: {info}")
 
         except Exception as e:
             print(f"Error processing {filename}: {e}")
