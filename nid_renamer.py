@@ -11,6 +11,7 @@ Nanosurf AFMのNIDファイルのヘッダーを解析し、オプションに�
     X: Points, fast軸のピクセル数
     Y: Lines, slow軸のライン数
     Z: {Points}x{Lines}形式
+    A: すべての情報を接頭語として付加 (DTSLXY)
     U: デフォルトの名前の場合は元の名前に戻す。(Image0010.nidなど)
 使用例:
     python nid_renamer.py -DTSZ C:/Data
@@ -46,6 +47,9 @@ def rename_nid_files(directory: Path, options="DT"):
         print(f"No .nid files found in: {directory}")
         return
 
+    if "A" in options:
+        # Aオプションはすべての情報を付加するため、オプション文字列を上書きして順序を固定する
+        options = "DTSLZ"
     for filepath in target_files:
         if not filepath.is_file():
             continue
