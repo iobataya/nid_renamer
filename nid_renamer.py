@@ -26,6 +26,31 @@ import re
 import sys
 from pathlib import Path
 
+def clean_text_for_filename(text):
+    """
+    ファイル名に使用するテキストからジャンク文字を除去し、安全な文字に置換する
+    """
+    if not text:
+        return text
+    
+    # latin-1で読み取った際に発生する一般的なジャンク文字を修正
+    replacements = {
+        'Â°': '',    # degree symbol (remove for filename safety)
+        'Âµ': 'u',   # micro symbol -> u (µm -> um)
+        'Â': '',     # standalone Â characters
+        ':': '',     # colon (時刻区切り文字)
+        ' ': '',     # spaces
+    }
+    
+    cleaned = text
+    for old, new in replacements.items():
+        cleaned = cleaned.replace(old, new)
+    
+    # 追加の制御文字除去
+    cleaned = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', cleaned)
+    
+    return cleaned
+
 def rename_nid_files(directory: Path, options="DT"):
     """
     NIDファイルのヘッダーを解析し、オプションに基づいてファイル名をリネームする。
@@ -79,30 +104,30 @@ def rename_nid_files(directory: Path, options="DT"):
                     # 日付 (DD-MM-YYYY -> YYYYMMDD)
                     if not info["D"]:
                         m = re_D.search(line)
-                        if m: info["D"] = f"{m.group(3)}{m.group(2)}{m.group(1)}"
+                        if m: info["D"] = clean_text_for_filename(f"{m.group(3)}{m.group(2)}{m.group(1)}")
                     
                     # 時刻 (HH:MM:SS -> HHMMSS)
                     if not info["T"]:
                         m = re_T.search(line)
-                        if m: info["T"] = f"{m.group(1)}{m.group(2)}{m.group(3)}"
+                        if m: info["T"] = clean_text_for_filename(f"{m.group(1)}{m.group(2)}{m.group(3)}")
                     
-                    # サイズ (数値だけ取り出し、末尾に "um" を強制付加して文字化けを防止)
+                    # サイズ (ジャンク文字を除去してファイル名に安全な形式に)
                     if not info["S"]:
                         m = re_S.search(line)
-                        if m: info["S"] = f"{m.group(1).strip()}{m.group(2).strip()}"
+                        if m: info["S"] = clean_text_for_filename(f"{m.group(1).strip()}{m.group(2).strip()}")
                     
                     # Time/Line
                     if not info["L"]:
                         m = re_L.search(line)
-                        if m: info["L"] = m.group(1).strip()
+                        if m: info["L"] = clean_text_for_filename(m.group(1).strip())
                     
                     # 解像度
                     if not info["X"]:
                         m = re_X.search(line)
-                        if m: info["X"] = m.group(1)
+                        if m: info["X"] = clean_text_for_filename(m.group(1))
                     if not info["Y"]:
                         m = re_Y.search(line)
-                        if m: info["Y"] = m.group(1)
+                        if m: info["Y"] = clean_text_for_filename(m.group(1))
 
             # --- 接頭語の組み立て ---
             parts = []
