@@ -1,0 +1,2 @@
+File Name,Image size,Scan direction,Time/Line,Points,Lines,X-Slope,Y-Slope,Rotation,X-Pos,Y-Pos,Z-Plane,Overscan,Line mode,Date,Time,Setpoint,P-Gain,I-Gain,D-Gain,P-Gain2,I-Gain2,D-Gain2,Tip voltage,Feedback mode,Feedback algo.,Vibration freq.,Vibration ampl.,Excitation ampl.,Ref. phase,Error range,Ampl. Ctrl. mode
+AC40-DNA-in-water-00412.nid,400nm,Up,100ms,512,256,-374m°,-236m°,0 °,-1.72µm,-3.36µm,-3.63nm,10 %,Standard,14-04-2022,14:26:35,85 %,1000,2500,0,0,1000,0,0 V,Free,Standard PID,178.296kHz,101mV,99.2mV,0.33k°,10 V,Const. Drive
